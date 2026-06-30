@@ -19,38 +19,22 @@ export const AppProvider = ( {children} : {children: React.ReactNode} )=>{
     const signup = async (credentials: Credentials)=>{
         const {data} = await mockApi.auth.register(credentials)
         setUser(data.user)
-        if(data?.user?.age && data?.user?.weight && data?.user?.goal){
-            setOnboardingCompleted(true)
-        }
+        setOnboardingCompleted(true)
         localStorage.setItem('token', data.jwt)
     }
 
     const login = async (credentials: Credentials)=>{
         const {data} = await mockApi.auth.login(credentials)
         setUser({...data.user, token: data.jwt})
-        if(data?.user?.age && data?.user?.weight && data?.user?.goal){
-            setOnboardingCompleted(true)
-        }
+        setOnboardingCompleted(true)
         localStorage.setItem('token', data.jwt)
     }
 
     const fetchUser = async(token: string)=>{
         const {data} = await mockApi.user.me()
         setUser({...data, token})
-        if(data?.age && data?.weight && data?.goal){
-            setOnboardingCompleted(true)
-        }
+        setOnboardingCompleted(true)
         setIsUserFetched(true)
-    }
-
-    const fetchFoodLogs = async ()=>{
-        const {data} = await mockApi.foodLogs.list()
-        setAllFoodLogs(data)
-    }
-
-    const fetchActivityLogs = async ()=>{
-        const {data} = await mockApi.activityLogs.list()
-        setAllActivityLogs(data)
     }
 
     const logout = ()=>{
@@ -64,11 +48,7 @@ export const AppProvider = ( {children} : {children: React.ReactNode} )=>{
     useEffect(()=>{
         const token = localStorage.getItem('token')
         if(token){
-            (async ()=>{
-                await fetchUser(token)
-                await fetchFoodLogs()
-                await fetchActivityLogs()
-            })();
+            setIsUserFetched(true)
         }else{
             setIsUserFetched(true)
         }
