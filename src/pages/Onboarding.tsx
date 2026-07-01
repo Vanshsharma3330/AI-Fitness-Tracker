@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, PersonStanding, ScaleIcon, Target, User } from "lucide-react"
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import toast, { Toaster } from "react-hot-toast"
 import { useAppContext } from "../context/AppContext"
 import type { ProfileFormData, UserData } from "../types"
@@ -14,6 +15,7 @@ import Slider from "../components/ui/Slider"
 const Onboarding = () => {
 
   const [step, setStep] = useState(1)
+  const navigate = useNavigate()
   const {user, setOnboardingCompleted, fetchUser} = useAppContext()
   const [formData, setFormData] = useState<ProfileFormData>({
     age: 0,
@@ -51,7 +53,8 @@ const Onboarding = () => {
 
       toast.success("Profile updated successfully")
       setOnboardingCompleted(true)
-      fetchUser(user?.token || "")
+      await fetchUser(user?.token || "")
+      navigate('/dashboard', { replace: true })
     }
   }
 
