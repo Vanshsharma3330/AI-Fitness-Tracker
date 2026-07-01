@@ -11,48 +11,56 @@ export const AppProvider = ( {children} : {children: React.ReactNode} )=>{
     const navigate = useNavigate()
     const [user, setUser] = useState<User>(null)
     const [isUserFetched, setIsUserFetched] = useState(false)
-    const [onboardingCompleted, setOnboardingCompleted] = useState(false)
+    const [onboardingCompleted, setOnboardingCompleted] = useState(() => {
+        return localStorage.getItem('onboardingCompleted') === 'true'
+    })
     const [allFoodLogs, setAllFoodLogs] = useState<FoodEntry[]>([])
     const [allActivityLogs, setAllActivityLogs] = useState<ActivityEntry[]>([])
-
 
     const signup = async (credentials: Credentials)=>{
         const {data} = await mockApi.auth.register(credentials)
         setUser(data.user)
-        setOnboardingCompleted(true)
+        setOnboardingCompleted(false)
         localStorage.setItem('token', data.jwt)
+        localStorage.setItem('onboardingCompleted', 'false')
     }
 
     const login = async (credentials: Credentials)=>{
         const {data} = await mockApi.auth.login(credentials)
         setUser({...data.user, token: data.jwt})
-        setOnboardingCompleted(true)
+        const completed = localStorage.getItem('onboardingCompleted') === 'true'
+        setOnboardingCompleted(completed)
         localStorage.setItem('token', data.jwt)
     }
 
     const fetchUser = async(token: string)=>{
         const {data} = await mockApi.user.me()
         setUser({...data, token})
-        setOnboardingCompleted(true)
+        const completed = localStorage.getItem('onboardingCompleted') === 'true'
+        setOnboardingCompleted(completed)
         setIsUserFetched(true)
     }
 
     const logout = ()=>{
         localStorage.removeItem('token')
+        localStorage.removeItem('onboardingCompleted')
         setUser(null)
         setOnboardingCompleted(false)
         navigate('/')
     }
 
-
     useEffect(()=>{
         const token = localStorage.getItem('token')
         if(token){
-            setIsUserFetched(true)
-        }else{
+            fetchUser(token)
+        } else {
             setIsUserFetched(true)
         }
     }, [])
+
+    useEffect(() => {
+        localStorage.setItem('onboardingCompleted', String(onboardingCompleted))
+    }, [onboardingCompleted])
 
 
     const value = {
