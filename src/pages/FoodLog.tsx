@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { useAppContext } from "../context/AppContext"
 import type { FoodEntry, FormData } from "../types";
 import Card from "../components/ui/Card";
-import { mealTypeOptions, quickActivitiesFoodLog } from "../assets/assets";
+import { mealColors, mealIcons, mealTypeOptions, quickActivitiesFoodLog } from "../assets/assets";
 import Button from "../components/ui/Button";
-import { Loader2Icon, PlusIcon, SparkleIcon, UtensilsCrossedIcon } from "lucide-react";
+import { Loader2Icon, PlusIcon, SparkleIcon, Trash2Icon, UtensilsCrossedIcon } from "lucide-react";
 import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
 import mockApi from "../assets/mockApi";
+import toast from "react-hot-toast";
 
 const FoodLog = () => {
 
@@ -40,11 +41,36 @@ const FoodLog = () => {
     setShowForm(false)
   }
 
+  const handleDelete = async (documentId: string)=>{
+    try{
+      const confirm = window.confirm('Are you sure you want to delete this entry?');
+      if(!confirm) return;
+      await mockApi.foodLogs.delete(documentId)
+      setAllFoodLogs(prev=>prev.filter((e)=>e.documentId !== documentId))
+    }catch(error: any){
+      console.log(error)
+      toast.error(error?.message || "Failed to delete food")
+    }
+  }
+
   const totalCalories = entries.reduce((sum, e)=> sum + e.calories, 0)
 
+  // Group entries by meal type
+  const groupedEntries: Record<'breakfast' | 'lunch' | 'dinner' | 'snack', FoodEntry[]> = entries.reduce((acc, entry)=>{
+    if(!acc[entry.mealType]) acc[entry.mealType] = [];
+    acc[entry.mealType].push(entry);
+    return acc
+  }, {} as Record<'breakfast' | 'lunch' | 'dinner' | 'snack', FoodEntry[]>)
+
   const handleQuickAdd = (activityName: string)=>{
-    setFormData({...formData, mealType: activityName})
+    setFormData({...formData, name: activityName})
     setShowForm(true)
+  }
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>)=>{
+    const file = e.target.files?.[0];
+    if(!file) return;
+    // implement image analysis
   }
 
   useEffect(()=>{
@@ -94,7 +120,7 @@ const FoodLog = () => {
               <SparkleIcon className="size-5" />
               AI Food Snap
             </Button>
-            <input type="file" accept="image/*" hidden ref={inputRef} />
+            <input onChange={handleImageChange} type="file" accept="image/*" hidden ref={inputRef} />
             {Loading && (
               <div className="fixed inset-0 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur flex items-center justify-center z-100">
                 <Loader2Icon className="size-8 text-emerald-600 dark:text-emerald-400 animate-spin" />
@@ -137,11 +163,51 @@ const FoodLog = () => {
             <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
               <UtensilsCrossedIcon className="size-8 text-slate-400 dark:text-slate-500" />
             </div>
-            <h3>No food logged today</h3>
-            <p>Start tracking your meals to stay on target</p>
+            <h3 className="font-semibold text-slate-700 dark:text-slate-200 mb-2">No food logged today</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Start tracking your meals to stay on target</p>
           </Card>
         ) : (
-          <div></div>
+          <div className="space-y-4">
+            {['breakfast', 'lunch', 'dinner', 'snack'].map((mealType)=>{
+              const mealTypeKey = mealType as keyof typeof groupedEntries;
+              if (!groupedEntries[mealTypeKey]?.length) return null;
+              const MealIcon = mealIcons[mealTypeKey];
+              const mealCalories = groupedEntries[mealTypeKey].reduce((sum, e)=> sum + e.calories, 0);
+
+              return (
+                <Card key={mealType}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${mealColors[mealTypeKey]}`}>
+                        <MealIcon className='size-5'/> 
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-800 dark:text-white capitalize">{mealType}</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{groupedEntries[mealTypeKey].length} items</p>
+                      </div>
+                    </div>
+                    <p className="font-semibold text-slate-700 dark:text-slate-200">{mealCalories} kcal</p>
+                  </div>
+                  <div className="space-y-2">
+                    {groupedEntries[mealTypeKey].map((entry)=>(
+                      <div key={entry.id} className="food-entry-item">
+                        <div className="flex-1">
+                          <p className="font-medium text-slate-700 dark:text-slate-200">{entry.name}</p>
+                          <p className="text-sm text-slate-400">{}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{entry.calories} kcal</span>
+                          <button onClick={()=>handleDelete(entry?.documentId || '')} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                            <Trash2Icon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
         )}
       </div>
     </div>
