@@ -1,0 +1,26 @@
+SETTING UP FOLDER STRUCTURE:
+1. npm create vite@latest
+2. React + Typescript Project
+3. Got a native rolldown package not found error while setting up folder structure for client - do npm install @rolldown/binding-win32-x64-msvc --save-dev for manually installing the package
+4. Remove everything from App.tsx
+5. Remove everything from index.css
+6. Delete App.css
+7. Update your app's tab title in index.html
+8. Copied assets material to src>assets 
+9. Add the favicon.svg icon into public folder and edit the href in index.html to change the logo for the site on the tab
+10. Import Tailwind CSS to the project - npm install tailwindcss @tailwindcss/vite > Configure what to add where fron official documentation on tailwind site
+11. Importing google fonts
+12. Create components - pages - types - context folder under src folder
+13. Set-up new files under Pages folder for the pages we want to create
+14. Created routes to navigate to different pages using 'react-router-dom'
+15. Import browser router in main.tsx and wrap the application with browser router
+16. Now use/setup <Routes></Routes> in app.tsx
+17. Set up ThemeContext.tsx and coded it for sark and light theme functionality
+18. Added AppContext code for login signup fetching functionality
+19. Mounted Login functionality page to the site and coding ui for the same
+20. Used AI to fix some stuff
+21. Going with the onboarding page creation now
+
+JAVASCRIPT v/s TYPESCRIPT:
+Typescript is statically typed superset of Javascript. Browsers can't directly execute typescript, the code first must be transpiled into standard Javascript.
+Javascript is dynamically types and errors are caught during application runtime whereas in Typescript errors are caught during compilation/coding.
