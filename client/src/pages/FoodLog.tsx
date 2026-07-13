@@ -7,7 +7,6 @@ import Button from "../components/ui/Button";
 import { Loader2Icon, PlusIcon, SparkleIcon, Trash2Icon, UtensilsCrossedIcon } from "lucide-react";
 import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
-import mockApi from "../assets/mockApi";
 import toast from "react-hot-toast";
 import api from "../configs/api";
 

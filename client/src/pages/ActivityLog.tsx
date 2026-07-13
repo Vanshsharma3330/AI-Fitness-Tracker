@@ -7,7 +7,6 @@ import { ActivityIcon, DumbbellIcon, PlusIcon, TimerIcon, Trash2Icon } from "luc
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import toast from "react-hot-toast";
-import mockApi from "../assets/mockApi";
 import api from "../configs/api";
 
 const ActivityLog = () => {

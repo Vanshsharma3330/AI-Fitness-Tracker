@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { initialState, type ActivityEntry, type Credentials, type FoodEntry, type User } from "../types";
 import { useNavigate } from "react-router-dom";
-import mockApi from "../assets/mockApi";
 import api from "../configs/api";
 import toast from "react-hot-toast";
 
@@ -99,11 +98,11 @@ export const AppProvider = ( {children} : {children: React.ReactNode} )=>{
     useEffect(()=>{
         const token = localStorage.getItem('token')
         if(token){
-            (async ()=>{
+            void (async ()=>{
                 await fetchUser(token)
                 await fetchFoodLogs(token)
                 await fetchActivityLogs(token)
-            })
+            })()
         }
     }, [])
 

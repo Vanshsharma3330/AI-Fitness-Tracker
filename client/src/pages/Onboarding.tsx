@@ -1,12 +1,10 @@
 import { ArrowLeft, ArrowRight, PersonStanding, ScaleIcon, Target, User } from "lucide-react"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import toast, { Toaster } from "react-hot-toast"
 import { useAppContext } from "../context/AppContext"
-import type { ProfileFormData, UserData } from "../types"
+import type { ProfileFormData } from "../types"
 import Input from "../components/ui/Input"
 import Button from "../components/ui/Button"
-import mockApi from "../assets/mockApi"
 import { ageRanges, goalOptions } from "../assets/assets"
 import Slider from "../components/ui/Slider"
 import api from "../configs/api"
@@ -16,7 +14,6 @@ import api from "../configs/api"
 const Onboarding = () => {
 
   const [step, setStep] = useState(1)
-  const navigate = useNavigate()
   const {user, setOnboardingCompleted, fetchUser} = useAppContext()
   const [formData, setFormData] = useState<ProfileFormData>({
     age: 0,
