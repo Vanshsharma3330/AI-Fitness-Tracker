@@ -18,17 +18,27 @@ export const AppProvider = ( {children} : {children: React.ReactNode} )=>{
     const [allFoodLogs, setAllFoodLogs] = useState<FoodEntry[]>([])
     const [allActivityLogs, setAllActivityLogs] = useState<ActivityEntry[]>([])
 
+    const resetSessionState = () => {
+        setUser(null)
+        setIsUserFetched(false)
+        setOnboardingCompleted(false)
+        setAllFoodLogs([])
+        setAllActivityLogs([])
+    }
+
     const signup = async (credentials: Credentials)=>{
 
         try {
             const {data} = await api.post('/api/auth/local/register', credentials)
 
-        setUser({...data.user, token: data.jwt})
-        if(data?.user?.age && data?.user?.weight && data?.user?.goal){
-            setOnboardingCompleted(true)
-        }
-        localStorage.setItem('token', data.jwt)
-        api.defaults.headers.common['Authorization'] = `Bearer ${data.jwt}`
+            resetSessionState()
+            setUser({...data.user, token: data.jwt})
+            setOnboardingCompleted(Boolean(data?.user?.age && data?.user?.weight && data?.user?.goal))
+            localStorage.setItem('token', data.jwt)
+            api.defaults.headers.common['Authorization'] = `Bearer ${data.jwt}`
+            await fetchUser(data.jwt)
+            await fetchFoodLogs(data.jwt)
+            await fetchActivityLogs(data.jwt)
         } catch (error: any) {
             console.log(error)
             toast.error(error?.response?.data?.error?.message || error?.message)
@@ -38,12 +48,14 @@ export const AppProvider = ( {children} : {children: React.ReactNode} )=>{
     const login = async (credentials: Credentials)=>{
         try {
             const {data} = await api.post('/api/auth/local', {identifier: credentials.email, password: credentials.password})
-        setUser({...data.user, token: data.jwt})
-        if(data?.user?.age && data?.user?.weight && data?.user?.goal){
-            setOnboardingCompleted(true)
-        }
-        localStorage.setItem('token', data.jwt)
-        api.defaults.headers.common['Authorization'] = `Bearer ${data.jwt}`
+            resetSessionState()
+            setUser({...data.user, token: data.jwt})
+            setOnboardingCompleted(Boolean(data?.user?.age && data?.user?.weight && data?.user?.goal))
+            localStorage.setItem('token', data.jwt)
+            api.defaults.headers.common['Authorization'] = `Bearer ${data.jwt}`
+            await fetchUser(data.jwt)
+            await fetchFoodLogs(data.jwt)
+            await fetchActivityLogs(data.jwt)
         } catch (error: any) {
             console.log(error)
             toast.error(error?.response?.data?.error?.message || error?.message)
@@ -54,9 +66,7 @@ export const AppProvider = ( {children} : {children: React.ReactNode} )=>{
         try {
             const {data} = await api.get('/api/users/me', {headers: {Authorization: `Bearer ${token}`}})
         setUser({...data, token})
-        if(data?.age && data?.weight && data?.goal){
-            setOnboardingCompleted(true)
-        }
+        setOnboardingCompleted(Boolean(data?.age && data?.weight && data?.goal))
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`
         } catch (error: any) {
             console.log(error)
@@ -89,8 +99,9 @@ export const AppProvider = ( {children} : {children: React.ReactNode} )=>{
 
     const logout = ()=>{
         localStorage.removeItem('token')
-        setUser(null)
-        setOnboardingCompleted(false)
+        localStorage.removeItem('onboardingCompleted')
+        resetSessionState()
+        setIsUserFetched(true)
         api.defaults.headers.common['Authorization'] = ''
         navigate('/')
     }
@@ -107,8 +118,12 @@ export const AppProvider = ( {children} : {children: React.ReactNode} )=>{
     }, [])
 
     useEffect(() => {
-        localStorage.setItem('onboardingCompleted', String(onboardingCompleted))
-    }, [onboardingCompleted])
+        if (user) {
+            localStorage.setItem('onboardingCompleted', String(onboardingCompleted))
+        } else {
+            localStorage.removeItem('onboardingCompleted')
+        }
+    }, [onboardingCompleted, user])
 
 
     const value = {

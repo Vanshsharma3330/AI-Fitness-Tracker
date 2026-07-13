@@ -21,7 +21,7 @@ const App = () => {
     <>
       <Toaster/>
       <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={user ? <Navigate to={onboardingCompleted ? "/dashboard" : "/onboarding"} replace /> : <Login />} />
       <Route path="/onboarding" element={user ? <Onboarding /> : <Navigate to="/" replace />} />
       <Route
         path="/dashboard"
