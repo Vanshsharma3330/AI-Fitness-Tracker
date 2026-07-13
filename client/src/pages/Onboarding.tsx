@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight, PersonStanding, ScaleIcon, Target, User } from "lucide-react"
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import toast, { Toaster } from "react-hot-toast"
 import { useAppContext } from "../context/AppContext"
 import type { ProfileFormData } from "../types"
@@ -14,6 +15,7 @@ import api from "../configs/api"
 const Onboarding = () => {
 
   const [step, setStep] = useState(1)
+  const navigate = useNavigate()
   const {user, setOnboardingCompleted, fetchUser} = useAppContext()
   const [formData, setFormData] = useState<ProfileFormData>({
     age: 0,
@@ -49,9 +51,10 @@ const Onboarding = () => {
       localStorage.setItem('fitnessUser', JSON.stringify(userData))
       try {
         await api.put(`/api/users/${user?.id}`, userData)
+        setOnboardingCompleted(true)
+        await fetchUser(user?.token || "")
         toast.success("Profile updated successfully")
-      setOnboardingCompleted(true)
-      fetchUser(user?.token || "")
+        navigate('/dashboard')
       } catch (error: any) {
         toast.error(error.message)
       }

@@ -15,7 +15,7 @@ const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const navigate = useNavigate()
-  const {login, signup, user} = useAppContext()
+  const {login, signup, user, onboardingCompleted} = useAppContext()
 
   const handleSubmit = async (e: React.FormEvent)=> {
     e.preventDefault()
@@ -30,9 +30,9 @@ const Login = () => {
 
   useEffect(()=>{
     if(user){
-      navigate('/dashboard')
+      navigate(onboardingCompleted ? '/dashboard' : '/onboarding')
     }
-  }, [user, navigate])
+  }, [user, onboardingCompleted, navigate])
 
   return (
     <>
