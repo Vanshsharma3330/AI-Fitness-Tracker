@@ -3,10 +3,12 @@ import {analyzeImage} from "../services/gemini";
 
 export default {
     async analyze(ctx: Context){
-        const file = ctx.request.files?.image as any;
-        if(!file) return ctx.badRequest('No image uplaoded')
+        const rawFile = ctx.request.files?.image as any;
+        const file = Array.isArray(rawFile) ? rawFile[0] : rawFile;
+        if(!file) return ctx.badRequest('No image uploaded')
 
-        const filePath = file.filePath;
+        const filePath = file.filePath || file.filepath || file.path || file.tempFilePath;
+        if(!filePath) return ctx.badRequest('Could not determine uploaded file path')
 
         try {
             const result = await analyzeImage(filePath)
