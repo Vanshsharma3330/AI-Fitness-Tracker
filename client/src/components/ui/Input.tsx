@@ -24,7 +24,20 @@ export default function Input({ label, type = 'text', value, onChange, placehold
             <input
                 type={type}
                 value={value}
-                onChange={(e) => onChange(type === 'number' ? parseFloat(e.target.value) : e.target.value)}
+                onChange={(e) => {
+                    if (type === 'number') {
+                        const raw = e.target.value
+                        const parsed = raw === '' ? '' : Number(raw)
+                        onChange(parsed)
+                    } else {
+                        onChange(e.target.value)
+                    }
+                }}
+                onFocus={(e) => {
+                    if (type === 'number' && String(value) === '0') {
+                        e.target.select()
+                    }
+                }}
                 placeholder={placeholder}
                 min={min}
                 max={max}
