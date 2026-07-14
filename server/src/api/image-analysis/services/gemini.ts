@@ -7,7 +7,7 @@ if (!apiKey) {
 }
 
 const ai = new GoogleGenAI({ apiKey });
-const model = process.env.GEMINI_MODEL || "gemini-3.5-pro";
+const model = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
 export const analyzeImage = async (filePath: string) => {
     try {
@@ -45,7 +45,10 @@ export const analyzeImage = async (filePath: string) => {
             config,
         });
 
-        const responseText = (response as any).text || (response as any).candidates?.[0]?.content?.text || "{}";
+        const responseText =
+  (response as any).text ||
+  (response as any).candidates?.[0]?.content?.parts?.[0]?.text ||
+  "{}";
         return JSON.parse(responseText);
     } catch (error) {
         console.error("Gemini analysis error:", error);
